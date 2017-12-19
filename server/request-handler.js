@@ -28,10 +28,15 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  // console.log(response.);
+  // console.log(request.url);
 
-  // The outgoing status.
+  var method = request.method;
+  var url = request.url;
+ 
+   // The outgoing status.
   var statusCode = 200;
-
+  
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
@@ -39,11 +44,69 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  var results = [
+    // {username: 'sile', message: 'we got data', roomname: 'lobby'}, 
+    // {username: 'fred', message: 'build a server', roomname: 'lobby'}
+  ];
+
+  if (request.method === 'GET') { 
+
+    request.on('error', (err) => {
+      console.error(err);
+    })
+    .on('data', (chunk) => {
+      results.push(chunk);
+    }).on('end', () => {
+      //results = Buffer.concat(results).toString();
+    });
+
+    response.on('error', (err) => {
+      // response.writeHead(404, )
+      console.error(err);
+    });
+    
+    response.writeHead(statusCode, headers);
+
+    const responseBody = { headers, method, url, results }; //method
+    
+    response.end(JSON.stringify(responseBody));
+  
+  } 
+  if (request.method === 'POST' && request.url === '/classes/messages') {
+    request.on('data', (chunk) => {
+      results.push(chunk);
+
+    }).on('end', () => {
+      results = results.concat(results).toString();
+      response.end(results);    
+    });
+  } else {
+    response.statusCode = 404;
+    response.end();
+  }
+
+
+  // if (request.url === '/classes/messages') {    
+  //   if (request.method === 'GET') {
+  //     console.log('inside GET');   
+  //     //response.write('check here');
+  //     //console.log();
+  //   } else if (request.method === 'POST') {
+  //     console.log('inside POST');
+  //   }
+    // if (headers['Content-Type'] === 'application/json') {
+    //   return { key: 'value' };
+    // }
+  //}
+
+// do we change header type when we send something back?
+
+
+
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,7 +115,10 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+
+
+
+  //response.end('Hello, Tester person!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -71,3 +137,4 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+module.exports.requestHandler = requestHandler;
