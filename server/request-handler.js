@@ -54,47 +54,29 @@ var requestHandler = function(request, response) {
 
 
   if (request.method === 'GET' && request.url === '/classes/messages') { 
-    // var body = [];
-    // request.on('error', (err) => {
-    //   console.error(err);
-    // })
-    // .on('data', (chunk) => {
-    //   //body.push(chunk);
-    // }).on('end', () => {
-    //   // body = Buffer.concat(body).toString();
-      
-    //   response.writeHead(200);
-    //   response.end(JSON.stringify(results));
-    // });
-
-    // response.on('error', (err) => {
-    //   // response.writeHead(404, )
-    // });
-    
     response.writeHead(200);
-
-    const responseBody = { headers, method, url, results }; //method
-    // console.log('response:', responseBody);
+    let responseBody = { headers, method, url, results };
     response.end(JSON.stringify(responseBody));
   
   } else if (request.method === 'POST' && request.url === '/classes/messages') {
-    const responseBody = { headers, method, url, results };
+    let responseBody = { headers, method, url, results };
     var body = [];                          //&& request.url === '/classes/messages'
     request.on('data', (chunk) => {
       body.push(chunk);
-
     });
+
     request.on('end', () => {
-      body = Buffer.concat(body).toString();
+      //body += body.toString();
       response.writeHead(201);
-      results.push(body);
-      console.log('results: ', results);
+      results.push(JSON.parse(body.toString()));
+      //console.log('body: ', body);
+      console.log('results, ', results);
       response.end(JSON.stringify(responseBody));    // <--------------- looking for key value pair with 'results' as the key
     });
   } else {
     //console.log('failed');
     response.writeHead(404);
-    response.end();
+    response.end('hello!');
   }
 
   // if (request.url === '/classes/messages') {    
