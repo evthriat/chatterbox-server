@@ -49,42 +49,47 @@ var requestHandler = function(request, response) {
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   var results = [
-    // {username: 'sile', message: 'we got data', roomname: 'lobby'}, 
+     //{username: 'Juno', message: 'Do my bidding!', roomname: 'lobby'}, 
     // {username: 'fred', message: 'build a server', roomname: 'lobby'}
   ];
 
   if (request.method === 'GET' && request.url === '/classes/messages') { 
-
+    var body = [];
     request.on('error', (err) => {
       console.error(err);
     })
     .on('data', (chunk) => {
-      results.push(chunk);
+      //body.push(chunk);
     }).on('end', () => {
-      results = Buffer.concat(results).toString();
+      // body = Buffer.concat(body).toString();
+      
+      response.writeHead(200);
+      response.end(JSON.stringify(results));
     });
 
     response.on('error', (err) => {
       // response.writeHead(404, )
-      console.error(err);
     });
     
-    response.writeHead(statusCode, headers);
+    response.writeHead(200);
 
     const responseBody = { headers, method, url, results }; //method
-    
+    //console.log('response:',responseBody);
     response.end(JSON.stringify(responseBody));
   
-  } else if (request.method === 'POST' && request.url === '/classes/messages') {                          //&& request.url === '/classes/messages'
+  } else if (request.method === 'POST' && request.url === '/classes/messages') {
+    var body = [];                          //&& request.url === '/classes/messages'
     request.on('data', (chunk) => {
-      console.log('inside post request');
-      results.push(chunk);
+      console.log('inside post request', results);
+      body.push(chunk);
 
     }).on('end', () => {
-      console.log('end of post request');
-      results = Buffer.concat(results).toString();
+      //console.log('end of post request');
+      body = Buffer.concat(body).toString();
       response.writeHead(201);
-      response.end(results);    
+      results.push(body);
+      response.end(JSON.stringify(results));    // <--------------- looking for key value pair with 'results' as the key
+      console.log('results: ', results)
     });
   } else {
     //console.log('failed');
