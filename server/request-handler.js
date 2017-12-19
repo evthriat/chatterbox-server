@@ -12,6 +12,9 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var results = [];
+
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -48,55 +51,51 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  var results = [
-     //{username: 'Juno', message: 'Do my bidding!', roomname: 'lobby'}, 
-    // {username: 'fred', message: 'build a server', roomname: 'lobby'}
-  ];
+
 
   if (request.method === 'GET' && request.url === '/classes/messages') { 
-    var body = [];
-    request.on('error', (err) => {
-      console.error(err);
-    })
-    .on('data', (chunk) => {
-      //body.push(chunk);
-    }).on('end', () => {
-      // body = Buffer.concat(body).toString();
+    // var body = [];
+    // request.on('error', (err) => {
+    //   console.error(err);
+    // })
+    // .on('data', (chunk) => {
+    //   //body.push(chunk);
+    // }).on('end', () => {
+    //   // body = Buffer.concat(body).toString();
       
-      response.writeHead(200);
-      response.end(JSON.stringify(results));
-    });
+    //   response.writeHead(200);
+    //   response.end(JSON.stringify(results));
+    // });
 
-    response.on('error', (err) => {
-      // response.writeHead(404, )
-    });
+    // response.on('error', (err) => {
+    //   // response.writeHead(404, )
+    // });
     
     response.writeHead(200);
 
     const responseBody = { headers, method, url, results }; //method
-    //console.log('response:',responseBody);
+    // console.log('response:', responseBody);
     response.end(JSON.stringify(responseBody));
   
   } else if (request.method === 'POST' && request.url === '/classes/messages') {
+    const responseBody = { headers, method, url, results };
     var body = [];                          //&& request.url === '/classes/messages'
     request.on('data', (chunk) => {
-      console.log('inside post request', results);
       body.push(chunk);
 
-    }).on('end', () => {
-      //console.log('end of post request');
+    });
+    request.on('end', () => {
       body = Buffer.concat(body).toString();
       response.writeHead(201);
       results.push(body);
-      response.end(JSON.stringify(results));    // <--------------- looking for key value pair with 'results' as the key
-      console.log('results: ', results)
+      console.log('results: ', results);
+      response.end(JSON.stringify(responseBody));    // <--------------- looking for key value pair with 'results' as the key
     });
   } else {
     //console.log('failed');
     response.writeHead(404);
     response.end();
   }
-
 
   // if (request.url === '/classes/messages') {    
   //   if (request.method === 'GET') {
