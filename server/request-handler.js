@@ -53,7 +53,7 @@ var requestHandler = function(request, response) {
     // {username: 'fred', message: 'build a server', roomname: 'lobby'}
   ];
 
-  if (request.method === 'GET') { 
+  if (request.method === 'GET' && request.url === '/classes/messages') { 
 
     request.on('error', (err) => {
       console.error(err);
@@ -61,7 +61,7 @@ var requestHandler = function(request, response) {
     .on('data', (chunk) => {
       results.push(chunk);
     }).on('end', () => {
-      //results = Buffer.concat(results).toString();
+      results = Buffer.concat(results).toString();
     });
 
     response.on('error', (err) => {
@@ -75,17 +75,20 @@ var requestHandler = function(request, response) {
     
     response.end(JSON.stringify(responseBody));
   
-  } 
-  if (request.method === 'POST' && request.url === '/classes/messages') {
+  } else if (request.method === 'POST' && request.url === '/classes/messages') {                          //&& request.url === '/classes/messages'
     request.on('data', (chunk) => {
+      console.log('inside post request');
       results.push(chunk);
 
     }).on('end', () => {
-      results = results.concat(results).toString();
+      console.log('end of post request');
+      results = Buffer.concat(results).toString();
+      response.writeHead(201);
       response.end(results);    
     });
   } else {
-    response.statusCode = 404;
+    //console.log('failed');
+    response.writeHead(404);
     response.end();
   }
 
